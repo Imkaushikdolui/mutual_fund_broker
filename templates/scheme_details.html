@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Data Card Template</title>
+  <!-- Bootstrap CSS -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+  <style>
+    body {
+      font-family: 'Montserrat', sans-serif;
+      background-image: url('https://source.unsplash.com/random/1920x1080?finance');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .main-card {
+      max-width: 800px;
+      background-color: #fff;
+      border-radius: 10px;
+      box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+      padding: 30px;
+      margin: auto;
+      flex-grow: 1;
+    }
+
+    .navbar {
+      background-color: rgba(51, 51, 51, 0.8);
+    }
+
+    .navbar-brand {
+      color: #fff;
+      font-weight: bold;
+    }
+
+    .nav-link {
+      color: #fff;
+    }
+
+    footer {
+      background-color: rgba(51, 51, 51, 0.8);
+      color: #fff;
+      padding: 20px;
+      text-align: center;
+    }
+
+    .card-title {
+      font-size: 24px;
+      font-weight: bold;
+      color: #333;
+    }
+
+    .card-text {
+      font-size: 16px;
+      color: #555;
+    }
+
+    .text-center {
+      margin-bottom: 30px;
+    }
+
+    .btn-primary {
+      background-color: #333;
+      border-color: #333;
+    }
+
+    .btn-primary:hover {
+      background-color: #555;
+      border-color: #555;
+    }
+
+    .form-control:focus {
+      border-color: #333;
+      box-shadow: 0 0 0 0.2rem rgba(51, 51, 51, 0.25);
+    }
+  </style>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-dark">
+    <div class="container">
+      <a class="navbar-brand" href="/">Mutual Fund Broker</a>
+      <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ml-auto">
+          <li class="nav-item">
+            <a class="nav-link" href="/">Home</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link" href="/login">Login</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
+  <div class="main-card">
+    <div class="container mt-5">
+      <h1 class="text-center">SCHEME DETAIL</h1>
+    </div>
+
+    <div class="container mt-5">
+      <h2 class="text-center mb-4">Checkout</h2>
+      <div class="row justify-content-center">
+        {% for s in scheme %}
+        <div class="col-md-6 mb-4">
+          <div class="row">
+            <div class="col-12">
+              <h5 class="card-title">{{ s.Scheme_Name }}</h5>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-6">
+              <p class="card-text"><strong>Scheme Code:</strong> {{ s.Scheme_Code }}</p>
+              <p class="card-text"><strong>ISIN Div Payout ISIN Growth:</strong> {{ s.ISIN_Div_Payout_ISIN_Growth }}</p>
+              <p class="card-text"><strong>ISIN Div Reinvestment:</strong> {{ s.ISIN_Div_Reinvestment }}</p>
+              <p class="card-text"><strong>Net Asset Value:</strong> {{ s.Net_Asset_Value }}</p>
+              <p class="card-text"><strong>Date:</strong> {{ s.Date }}</p>
+            </div>
+            <div class="col-6">
+              <p class="card-text"><strong>Scheme Type:</strong> {{ s.Scheme_Type }}</p>
+              <p class="card-text"><strong>Scheme Category:</strong> {{ s.Scheme_Category }}</p>
+              <p class="card-text"><strong>Mutual Fund Family:</strong> {{ s.Mutual_Fund_Family }}</p>
+              <div class="form-group">
+                <label for="unitInput">Units:</label>
+                <input type="number" class="form-control" id="unitInput" placeholder="Enter units" min="1">
+              </div>
+              <button type="button" class="btn btn-primary">Buy</button>
+              <div id="purchasedUnits" class="mt-3" style="display: none;">
+                <p class="card-text"><strong>Purchased Units:</strong> <span id="unitsPurchased"></span></p>
+                <p class="card-text"><strong>Total Value:</strong> <span id="totalValue"></span></p>
+              </div>
+            </div>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+  </div>
+
+  <footer class="mt-5">
+    <div class="container">
+      <p>&copy; 2023 Mutual Fund Broker. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <!-- Bootstrap JS -->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+  <script>
+    $(document).ready(function() {
+      $(".btn-primary").click(function() {
+        var unitInput = $(this).parent().find("#unitInput");
+        var units = unitInput.val();
+        var navValue = parseFloat($(this).parent().parent().find(".card-text:contains('Net Asset Value:')").text().split(":")[1].trim());
+        var totalValue = units * navValue;
+
+        var purchasedUnitsDiv = $(this).parent().find("#purchasedUnits");
+        purchasedUnitsDiv.find("#unitsPurchased").text(units);
+        purchasedUnitsDiv.find("#totalValue").text(totalValue.toFixed(2));
+        purchasedUnitsDiv.show();
+      });
+    });
+  </script>
+</body>
+</html>

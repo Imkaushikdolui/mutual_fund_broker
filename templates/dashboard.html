@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Table Template</title>
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <!-- DataTables CSS -->
+    <link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.25/css/dataTables.bootstrap4.min.css">
+    <style>
+        .loader {
+            border: 4px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 4px solid #3498db;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: auto;
+            margin-top: 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .navbar {
+            background-color: #333;
+        }
+
+        .navbar-brand {
+            color: #fff;
+            font-weight: bold;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .nav-link {
+            color: #fff;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        footer {
+            background-color: #333;
+            color: #fff;
+            padding: 20px;
+            text-align: center;
+            position: sticky;
+            bottom: 0;
+            width: 100%;
+        }
+
+        .content-container {
+            display: grid;
+            grid-template-columns: 1fr 3fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .container {
+            flex-grow: 1;
+        }
+
+        h1, h2 {
+            font-family: 'Montserrat', sans-serif;
+            color: #333;
+        }
+
+        .btn-primary {
+            background-color: #333;
+            border-color: #333;
+        }
+
+        .btn-primary:hover {
+            background-color: #555;
+            border-color: #555;
+        }
+
+        .btn-secondary:hover {
+            background-color: #ccc;
+            border-color: #ccc;
+        }
+
+        table a {
+            text-decoration: none;
+            color: #333;
+        }
+
+        table a:hover {
+            color: #555;
+        }
+
+        .dropdown-container {
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .form-select {
+            font-family: 'Montserrat', sans-serif;
+            border-radius: 5px;
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark">
+        <div class="container">
+            <a class="navbar-brand" href="/">Mutual Fund Broker</a>
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="#">Home</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/login">Login</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container">
+        <h1 class="mt-5 text-center">Dashboard</h1>
+        <div class="content-container">
+            <div class="dropdown-container">
+                <form id="filterForm" method="POST">
+                    <div class="mb-3">
+                        <label for="fundFamily" class="form-label">Select Fund Family House:</label>
+                        <select class="form-select" id="fundFamily" name="fundFamily">
+                            <option value="">Select Fund Family</option>
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <button type="submit" class="btn btn-primary">Submit</button>
+                        <button type="button" id="clearButton" class="btn btn-secondary">Clear</button>
+                    </div>
+                </form>
+            </div>
+            <div>
+                <h2>Data Table</h2>
+                <div id="loader" class="loader"></div>
+                <table id="dataTable" class="table table-striped table-bordered" style="width:100%; display:none;">
+                    <thead>
+                        <tr>
+                            <th>Scheme Name</th>
+                            <th>Net Asset Value</th>
+                            <th>Date</th>
+                            <th>Scheme Type</th>
+                            <th>Scheme Category</th>
+                            <th>Mutual Fund Family</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Data will be populated dynamically here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <footer class="mt-5">
+        <div class="container">
+            <p>&copy; 2023 Mutual Fund Broker. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <!-- DataTables JS -->
+    <script src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
+    <script src="https://cdn.datatables.net/1.10.25/js/dataTables.bootstrap4.min.js"></script>
+    <script>
+        var table;
+
+        $(document).ready(function() {
+            $('#dataTable').hide(); 
+            $('#loader').show(); 
+            $.ajax({
+                url: "https://latest-mutual-fund-nav.p.rapidapi.com/latest",
+                type: "GET",
+                headers: {
+                    "X-RapidAPI-Key": "0aed724da0msh41c5c48e657a1c7p19975fjsn76d7f762f3c9",
+                    "X-RapidAPI-Host": "latest-mutual-fund-nav.p.rapidapi.com"
+                },
+                success: function(response) {
+                    var uniqueFamilies = [...new Set(response.map(scheme => scheme.Mutual_Fund_Family))];
+
+                    var select = $('#fundFamily');
+                    $.each(uniqueFamilies, function(index, family) {
+                        select.append($('<option></option>').attr('value', family).text(family));
+                    });
+                },
+                error: function(xhr, status, error) {
+                    console.error("Error fetching mutual fund families:", error);
+                }
+            });
+
+            table = $('#dataTable').DataTable({
+                "columns": [
+                    { 
+                        "data": "Scheme_Name",
+                        "render": function (data, type, row, meta) {
+                            return '<a href="/scheme/' + row.Scheme_Code + '" style="cursor: pointer;">' + data + '</a>';
+                        }
+                    },
+                    { "data": "Net_Asset_Value" },
+                    { "data": "Date" },
+                    { "data": "Scheme_Type" },
+                    { "data": "Scheme_Category" },
+                    { "data": "Mutual_Fund_Family" }
+                ]
+            });
+
+            $.ajax({
+                url: "https://latest-mutual-fund-nav.p.rapidapi.com/latest",
+                type: "GET",
+                headers: {
+                    "X-RapidAPI-Key": "0aed724da0msh41c5c48e657a1c7p19975fjsn76d7f762f3c9",
+                    "X-RapidAPI-Host": "latest-mutual-fund-nav.p.rapidapi.com"
+                },
+                success: function(response) {
+                    $('#loader').hide();
+                    $('#dataTable').show();
+
+                    table.clear().rows.add(response).draw();
+                },
+                error: function(xhr, status, error) {
+                    console.error("Error fetching data:", error);
+                }
+            });
+
+            $('#filterForm').submit(function(event) {
+                event.preventDefault(); 
+
+                var family = $('#fundFamily').val();
+
+                console.log("Selected Fund Family:", family);
+
+                table.column(5).search(family).column(3).search("Open Ended Schemes").draw();
+            });
+
+            $('#clearButton').click(function() {
+                table.search('').columns().search('').draw();
+                $('#fundFamily').val('');
+            });
+        });
+    </script>
+</body>
+</html>
